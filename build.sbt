@@ -1,8 +1,6 @@
-import com.typesafe.sbt.SbtScalariform.defaultScalariformSettings
+import Dependencies._
 import sbt.Keys._
 import sbt._
-import Dependencies._
-import com.typesafe.sbt.pgp.PgpKeys
 
 lazy val pomSettings = Seq(
   pomIncludeRepository := { _ => false},
@@ -33,8 +31,8 @@ lazy val pomSettings = Seq(
   licenses +=("W3C", url("http://opensource.org/licenses/W3C"))
 )
 
-//sbt -Dbanana.publish=bblfish.net:/home/hjs/htdocs/work/repo/
-//sbt -Dbanana.publish=bintray
+// sbt -Dbanana.publish=bblfish.net:/home/hjs/htdocs/work/repo/
+// sbt -Dbanana.publish=bintray
 lazy val publicationSettings = pomSettings ++ {
   val pubre = """([^:]+):([^:]+)""".r
   Option(System.getProperty("banana.publish")) match {
@@ -66,10 +64,14 @@ lazy val publicationSettings = pomSettings ++ {
   }
 }
 
+lazy val defaultScalariformSettings = Seq(
+  scalariformAutoformat := false
+)
+
 lazy val commonSettings = publicationSettings ++ defaultScalariformSettings ++ Seq(
   organization := "org.w3",
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  scalaVersion := "2.12.10",
+  crossScalaVersions := Seq("2.12.10"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   resolvers += "apache-repo-releases" at "http://repository.apache.org/content/repositories/releases/",
   fork := false,
@@ -139,13 +141,15 @@ lazy val plantain = crossProject
 lazy val plantainJS = plantain.js
 lazy val plantainJVM = plantain.jvm
 
-lazy val jena = Project("jena", file("jena"), settings = commonSettings)
+lazy val jena = Project("jena", file("jena"))
+  .settings(commonSettings)
   .settings(
     name := "banana-jena",
     libraryDependencies ++= Seq(jenaLibs, commonsLogging, aalto )
   ).dependsOn(rdfJVM, ntriplesJVM, rdfTestSuiteJVM % "test->compile")
 
-lazy val sesame = Project("sesame", file("sesame"), settings = commonSettings)
+lazy val sesame = Project("sesame", file("sesame"))
+  .settings(commonSettings)
   .settings(
     name := "banana-sesame",
     libraryDependencies ++= Seq(
@@ -162,13 +166,15 @@ lazy val sesame = Project("sesame", file("sesame"), settings = commonSettings)
     )
   ).dependsOn(rdfJVM, ntriplesJVM, rdfTestSuiteJVM % "test->compile")
 
-lazy val jsonldJS = Project("jsonld", file("jsonld.js"), settings = commonSettings)
+lazy val jsonldJS = Project("jsonld", file("jsonld.js"))
+  .settings(commonSettings)
   .settings(
     name := "banana-jsonld"
   ).dependsOn(rdfJS, ntriplesJS, plantainJS, rdfTestSuiteJS % "test->compile")
   .enablePlugins(ScalaJSPlugin)
 
-lazy val examples = Project("examples", file("misc/examples"), settings = commonSettings)
+lazy val examples = Project("examples", file("misc/examples"))
+  .settings(commonSettings)
   .settings(
     name := "banana-examples"
   ).dependsOn(sesame, jena)
@@ -184,7 +190,7 @@ name := "banana"
 
 commonSettings
 
-unidocSettings
+enablePlugins(ScalaUnidocPlugin)
 
 addCommandAlias("validate", ";compile;test;runExamples")
 
